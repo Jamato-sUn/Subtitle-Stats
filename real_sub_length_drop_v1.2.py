@@ -11,7 +11,7 @@ import os  # file existence
 
 
 # accepts milliseconds
-def print_time(mt):  # stupid, but better than datetime
+def print_time(mt):
     seconds = round(mt / 1000)  # seconds rounded
     hours, remainder = divmod(seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
@@ -38,20 +38,17 @@ def process_ass(full_text):
     # i = 0 # for debugging
     for line in lines:
         # i+=1;
-        # print(str(i)+" "+str(line)); # for debugging
-        m = line.split(',', 10)
+        # the maxsplit needs to be amount of chunks - 1, so 9
+        m = line.split(',', 9)
         # if this not a valid or empty line
         if len(m) < 10 or m[9] == "":
             continue
-
-        result1 = [m[9], m[1], m[2]]
-        # print(result1)
         text_lines_amount += 1
         # print(">>>"+result1[0]+"<<<") # for debugging
-        character_count += len(result1[0])
-        character_no_space += len(result1[0].replace(" ", ""))
+        character_count += len(m[9])
+        character_no_space += len(m[9].replace(" ", ""))
         # sending centiseconds here, hence the extra "0"
-        total_length += timecode_difference(result1[1] + "0", result1[2] + "0")
+        total_length += timecode_difference(m[1] + "0", m[2] + "0")
 
     return total_length, character_count, character_no_space, text_lines_amount
 
@@ -86,6 +83,7 @@ def process_srt(full_text):
 
 # Parses two strings which should have timecodes in them
 # Returns difference in milliseconds
+# Does NOT account for centiseconds in ASS, it is done elsewhere
 def timecode_difference(t_start, t_end):
     expression_timecode = r"(?P<hours>\d+):(?P<minutes>\d\d):(?P<seconds>\d\d)[:.,](?P<centiseconds>\d+)"
     result = [re.findall(expression_timecode, t_start)[0], re.findall(expression_timecode, t_end)[0]]
